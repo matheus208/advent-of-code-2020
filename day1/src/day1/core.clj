@@ -1,4 +1,4 @@
-(ns puzzle1.core
+(ns day1.core
   (:gen-class))
 
 (def expense-report [1711
@@ -213,15 +213,27 @@
   This is an initial draft and it is not optimal. It could be improved upon by using binary search O(n log n) and/or iterating through the map once
   to build a 'cache', and then finding the correct result in O(n)"
   [amount [head & tail]]
-  (let [wanted-el (- amount head)]
-    (if (some #{wanted-el} tail)
-      [head wanted-el]
+  (when (some? head)
+    (let [wanted-el (- amount head)]
+     (if (some #{wanted-el} tail)
+       [head wanted-el]
+       (when (seq tail)
+         (find-pair-that-sums-to amount tail))))))
+
+(defn find-trio-that-sums-to
+  [amount [head & tail]]
+  (let [wanted-amount (- amount head)]
+    (if-let [other-pair (find-pair-that-sums-to wanted-amount tail)]
+      (conj other-pair head)
       (when (seq tail)
-        (find-pair-that-sums-to amount tail)))))
+        (find-trio-that-sums-to amount tail)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (println (if-let [matched-pair (find-pair-that-sums-to desired-amount (sort expense-report))]
-     (apply * matched-pair)
-     "There is no pair that sums to the desired amount")))
+             (apply * matched-pair)
+             "There is no pair that sums to the desired amount"))
+  (println (if-let [matched-trio (find-trio-that-sums-to desired-amount (sort expense-report))]
+             (apply * matched-trio)
+             "There is no trio that sums to the desired amount")))

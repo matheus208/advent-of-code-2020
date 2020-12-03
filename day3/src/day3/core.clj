@@ -1,8 +1,6 @@
 (ns day3.core
   (:gen-class))
 
-
-
 (defn find-trees-in-path
   [lines {cols-skip :cols rows-skip :rows}]
   (let [mod-nth        (fn [coll n] (nth coll (mod n (count coll))))

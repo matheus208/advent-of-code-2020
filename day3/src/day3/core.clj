@@ -4,22 +4,19 @@
 
 
 (defn find-trees-in-path
-  [lines strategy]
-  (let [cols-skip (:cols strategy)
-        rows-skip (:rows strategy)
-        mod-nth   (fn [n coll] (nth coll (mod n (count coll))))]
+  [lines {cols-skip :cols rows-skip :rows}]
+  (let [mod-nth        (fn [coll n] (nth coll (mod n (count coll))))
+        keep-every-nth (fn [n] (fn [index item] (when (= 0 (mod index n)) item)))
+        is-tree?       (fn [c] (= \# c))]
     (->> lines
-         (keep-indexed (fn [index item] (when (= 0 (mod index rows-skip)) item)))
+         (keep-indexed (keep-every-nth rows-skip))
          (reduce
-           (fn [ctx line]
-             (let [col (:col ctx)]
-               (-> ctx
-                   (update :tree-count (if (= \. (mod-nth col line))
-                                         identity
-                                         inc))
-                   (update :col (partial + cols-skip)))))
-           {:tree-count 0
-            :col        0})
+           (fn [{:keys [tree-count current-col]} line]
+             {:tree-count  (cond-> tree-count
+                             (is-tree? (mod-nth line current-col)) inc)
+              :current-col (+ current-col cols-skip)})
+           {:tree-count  0
+            :current-col 0})
          :tree-count)))
 
 (defn -main

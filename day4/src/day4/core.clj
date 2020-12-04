@@ -3,8 +3,8 @@
 
 (def required-fields [:byr :iyr :eyr :hgt :hcl :ecl :pid])
 
-(defn parse-int [s] (try (Integer/valueOf s) (catch Exception e nil)))
-(defn number-between [lower-bound upper-bound] #(<= lower-bound (parse-int %) upper-bound))
+(defn parse-int! [s] (try (Integer/valueOf s) (catch Exception e nil))) ; This would ideally not swallow the exception
+(defn number-between [lower-bound upper-bound] #(<= lower-bound (parse-int! %) upper-bound))
 (def birth-year-validator (number-between 1920 2002))
 (def issue-year-validator (number-between 2010 2020))
 (def expiration-year-validator (number-between 2020 2030))
@@ -21,7 +21,7 @@
                              :validation-fn expiration-year-validator}
                        :hgt {:required      true
                              :validation-fn #(let [[_ value-as-string unit] (re-matches #"(\d{2,3})(cm|in)" %)
-                                                   value                    (parse-int value-as-string)
+                                                   value                    (parse-int! value-as-string)
                                                    validator-fn             (get height-validator-by-unit unit (constantly false))]
                                                (boolean (when value (validator-fn value))))}
                        :hcl {:required      true

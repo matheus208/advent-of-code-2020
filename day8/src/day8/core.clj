@@ -83,23 +83,6 @@ acc +6")
                  (recur (+ line argument) instructions new-context)) ; continue as jmp
           (throw (ex-info "Instruction not supported" {:instruction instruction}))))))))
 
-(defn fix-and-execute-2
-  [instructions]
-  (if-let [context (terminates? instructions)]
-    context                                     ;we didn't need to replace anything
-    (reduce-kv
-     (fn [_ index [instruction argument]]
-       (let [new-instruction-set  (case instruction
-                                    :nop (assoc instructions index [:jmp argument])
-                                    :jmp (assoc instructions index [:nop argument])
-                                    instructions)]
-         (when (terminates? new-instruction-set)
-           (reduced (assoc (execute new-instruction-set) :fixed-instruction index)))))
-     nil
-     instructions)))
-
-
-
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
